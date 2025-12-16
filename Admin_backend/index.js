@@ -5,6 +5,9 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import employrouter  from './src/Router/Employ.Route.js';
 import jobrouter from './src/Router/Job.Route.js';
+import rjobrouter from './src/Router/rJob.Router.js';
+import candidateRouter from "./src/Router/Candidate.Route.js"
+import candidateProfile from "./src/Router/candidateProfile.js"
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -37,7 +40,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/v1/employ', employrouter);
 app.use('/api/v1/job', jobrouter);
-
+app.use('/api/v1/rrjob', rjobrouter)
+app.use('/api/v1/candidate', candidateRouter)
+app.use('/api/v1/candidate/profile', candidateProfile)
 
 connectDB()
     .then(() =>{

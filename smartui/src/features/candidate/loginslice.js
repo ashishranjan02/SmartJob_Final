@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // Base URL of your backend
-const API_URL = "http://localhost:5000/api/auth"; // change this to your backend URL
+const API_URL = "http://localhost:3300/api/v1/candidate";
 
 // Async Thunks
 export const registerUser = createAsyncThunk(
@@ -58,6 +58,44 @@ export const getProfile = createAsyncThunk(
   }
 );
 
+// Add more thunks for profile actions
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.put(
+        `${API_URL}/profile/update`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data.user;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: "Failed to update profile" });
+    }
+  }
+);
+
+export const deleteProfile = createAsyncThunk(
+  "auth/deleteProfile",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${API_URL}/profile/delete`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return true;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: "Failed to delete profile" });
+    }
+  }
+);
+
 // Initial State
 const initialState = {
   user: null,
@@ -65,7 +103,7 @@ const initialState = {
   loading: false,
   error: null,
   message: null,
-  otpVerified:false,
+  otpVerified: false,
 };
 
 // Slice
@@ -135,7 +173,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || "Login failed";
       });
-      builder
+    builder
       .addCase(getProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -148,8 +186,40 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message;
       });
-  },
-});
+
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload; // updated user
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message;
+      });
+
+    // Delete Profile
+    builder
+      .addCase(deleteProfile.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteProfile.fulfilled, (state) => {
+        state.loading = false;
+        state.user = null;
+        state.token = null;
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      })
+      .addCase(deleteProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message;
+      });
+  }
+
+},
+);
 
 export const { logout, clearError } = authSlice.actions;
 export default authSlice.reducer;

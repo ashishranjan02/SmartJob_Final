@@ -31,7 +31,7 @@ const Header = ({ handleDrawerToggle, isMobile }) => {
   const location = useLocation();
   const dispatch = useDispatch();
 
-  const { user } = useSelector((state) => state.users);
+  const { user } = useSelector((state) => state.recruiterProfile);
   const [anchorEl, setAnchorEl] = useState(null);
   const [searchValue, setSearchValue] = useState('');
 

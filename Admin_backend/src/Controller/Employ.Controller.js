@@ -30,7 +30,7 @@ export const createEmploy = async (req, res) => {
         }
 
         // 4. Profile photo (safe check)
-        const recruiterImage = req.file?.path ?? null;
+        const recruiterImage = req.file ? req.file.path : null;
 
         const hashedPassword = await bcrypt.hash(password, 10);
         
@@ -67,10 +67,12 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
      const token = jwt.sign(
-      { id: user._id, role: user.role, recruiterId: user.recruiterId, adminId: user.adminId },
+      { id: user._id, email: user.email, role: user.role, recruiterId: user.recruiterId, adminId: user.adminId },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
+
+    const Image = user.recruiterImage? `${req.protocol}://${req.get("host")}/${user.recruiterImage}` : null;
 
     res.status(200).json({
       message: "Login successful",
@@ -88,6 +90,7 @@ export const login = async (req, res) => {
       totalExperience: user.totalExperience,
       level: user.level, 
       status: user.status,
+      recruiterImage: Image,
     });
   } catch (error) {
     console.error(error);
@@ -110,7 +113,6 @@ export const getAllEmploy = async(req, res) => {
     }
 }
 
-// export const getR
 
 export const getRecruiterById = async(req, res) =>{
   const {recruiterId} = req.params;
@@ -119,7 +121,7 @@ export const getRecruiterById = async(req, res) =>{
     return res.status(400).json({message: "Recruiter ID is required"});
   }
   try{
-    const viewRecruiter = await employ.findOne({recruiterId});
+    const viewRecruiter = await employ.findOne({recruiterId}).select("-password");
     res.status(200).json(viewRecruiter)
 
     if(!viewRecruiter){
@@ -129,48 +131,62 @@ export const getRecruiterById = async(req, res) =>{
   catch(error){
     console.error(error)
     res.status(500).json({message: error.message})
-
   }
-  
 }
 
-export const updateRecruiter = async (req, res) => {
-  const { recruiterId } = req.params;
+export const getEmployProfile = async (req, res) => {
+  const {recruiterId} = req.params;
 
+  if(!recruiterId){
+     return res.status(400).json({message: "ID is required"});
+  }
   try {
+    const employProfile = await employ.findOne({recruiterId}).select("-password");
+
+    if (!employProfile) {
+      return res.status(404).json({ message: "Employee profile not found" });
+    }
+    res.status(200).json(employProfile);
+  } 
+  catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+}
+
+
+export const updateRecruiterProfile = async (req, res) => {
+  const { recruiterId } = req.params;
+  try {
+
     const allowedUpdates = [
       "firstName", "lastName", "gender", "phoneNo", "currentLocation",
       "description", "totalExperience", "level", "companyName"
     ];
 
     const updateData = Object.fromEntries(
-      Object.entries(req.body).filter(([key]) => allowedUpdates.includes(key))
+      Object.entries(req.body || {}).filter(([key]) => allowedUpdates.includes(key))
     );
 
-    if (req.file) {
+    if (req.file) { 
       updateData.recruiterImage = req.file.path;
     }
 
-    const existingRecruiter = await employ.findOneAndUpdate(
-      { recruiterId },
-      updateData,
+    const existingRecruiter = await employ.findOneAndUpdate({ recruiterId }, updateData,
       { new: true, runValidators: true }
-    );
+    )
 
     if (!existingRecruiter) {
       return res.status(404).json({ message: "Recruiter not found" });
     }
 
-    res.status(200).json({
-      message: "Recruiter updated successfully",
-      employ: existingRecruiter,
-    });
+    res.status(200).json({ message: "Recruiter updated successfully", employ: existingRecruiter });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
 export const updateRecruiterStatus = async (req, res) => {

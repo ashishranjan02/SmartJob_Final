@@ -16,14 +16,14 @@ import BookmarkedCandidatesPage from "../pages/candidates/BookmarkedCandidatesPa
 import CandidateDetailPage from "../pages/candidates/CandidateDetailPage.jsx";
 import InterviewsPage from "../pages/interviews/InterviewsPage.jsx";
 import CommunicationPage from "../pages/communication/CommunicationPage.jsx";
-import ProfilePage from "../pages/profile/ProfilePage.jsx";
-import TokenHandler from "../pages/auth/TokenHandler.jsx";
+// import ProfilePage from "../pages/profile/ProfilePage.jsx";
+// import TokenHandler from "../pages/auth/TokenHandler.jsx";
 
 const AppRoutes = () => {
   return (
     <Routes>
       {/* ✅ Directly handle token & role */}
-      <Route path="/" element={<TokenHandler />} />
+      {/* <Route path="/" element={<TokenHandler />} /> */}
 
       {/* Dashboard Layout */}
       <Route path="/" element={<DashboardLayout />}>
@@ -43,7 +43,7 @@ const AppRoutes = () => {
 
         <Route path="interviews" element={<InterviewsPage />} />
         <Route path="communication" element={<CommunicationPage />} />
-        <Route path="profile" element={<ProfilePage />} />
+        {/* <Route path="profile" element={<ProfilePage />} /> */}
       </Route>
 
       {/* Fallback */}

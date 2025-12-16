@@ -20,11 +20,11 @@ import { login } from "../../../features/employ/employAuthSlice";
 
 const LoginPage = () => {
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.auth);
+  const { loading, error } = useSelector((state) => state.employAuth);
 
   const [formData, setFormData] = useState({ email: "", password: "", role: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [success, setSuccess] = useState(false); // ✅ FIX: added success state
+  const [success, setSuccess] = useState(false); //  FIX: added success state
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,29 +34,44 @@ const LoginPage = () => {
   e.preventDefault();
   try {
     const loginResponse = await dispatch(login(formData)).unwrap();
+    console.log("Login full response:", loginResponse);
+
+    if (!loginResponse) {
+      throw new Error("Invalid response from server");
+    }
+
     const token = loginResponse.token;
-    const role = loginResponse.role?.toLowerCase(); // fix here
+    const role = loginResponse.role?.toLowerCase(); 
+    const profile = loginResponse.recruiterImage || "";
 
     // Save to localStorage
-    localStorage.setItem("authToken", token);
-    localStorage.setItem("userRole", role);
-
-    console.log("Role received:", role);
-
+    if (typeof window !== "undefined" && window.localStorage) {
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("userRole", role);
+      localStorage.setItem("profile", profile);
+      localStorage.setItem("user", JSON.stringify(loginResponse));
+    } 
+    else {
+      console.warn("LocalStorage is not available");
+    }
     setSuccess(true);
 
     // Redirect based on role
-    if (role === "admin") {
-      window.location.href = `http://localhost:5174/?token=${token}&role=${role}`;
-    } else if (role === "recruiter") {
-      window.location.href = `http://localhost:3000/?token=${token}&role=${role}`;
-    }
-  } catch (err) {
+    setTimeout(() => {
+      if (role === "admin") {
+        window.location.href = `http://localhost:5174/?token=${token}&role=${role}`;
+      } else if (role === "recruiter") {
+        window.location.href = `http://localhost:3000/?token=${token}&role=${role}`;
+      } else {
+        console.warn("Unknown role:", role);
+      }
+    }, 1200);
+  } 
+  catch (err) {
     console.error("Login failed", err);
     setSuccess(false);
   }
 };
-
 
   return (
     <Container maxWidth="lg">

@@ -11,15 +11,15 @@ import {
 } from "@mui/material";
 import { Edit, Save, Cancel, Person, Upload } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { updateRecruiterProfile,fetchUserProfile } from "../../slice/RegisterSlice";
+import { updateRecruiterProfile,fetchUserProfile } from "../../slice/ProfileSlice.js";
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
-  const { user, loading } = useSelector((state) => state.users);
+  const { user, loading } = useSelector((state) => state.recruiterProfile);
 
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState(user || {});
-  const [preview, setPreview] = useState(user?.photo || "");
+  const [preview, setPreview] = useState(user?.recruiterImage || "");
 useEffect(() => {
     dispatch(fetchUserProfile());
   }, [dispatch]);
@@ -28,7 +28,7 @@ useEffect(() => {
   useEffect(() => {
     if (user) {
       setFormData(user);
-      setPreview(user.photo || "");
+      setPreview(user.recruiterImage || "");
     }
   }, [user]);
   const handleChange = (e) => {
@@ -41,14 +41,14 @@ const handleSave = () => {
 
   // Append text fields
   Object.keys(formData).forEach((key) => {
-    if (key !== "photo") {
+    if (key !== "recruiterImage") {
       formDataToSend.append(key, formData[key]);
     }
   });
 
   // Append photo if exists (only File, not Base64)
   if (formData.photo instanceof File) {
-    formDataToSend.append("photo", formData.photo);
+    formDataToSend.append("recruiterImage", formData.recruiterImage);
   }
 
   dispatch(updateRecruiterProfile(formDataToSend)).then((res) => {
@@ -63,7 +63,7 @@ const handleSave = () => {
  const handlePhotoChange = (e) => {
   const file = e.target.files[0];
   if (file) {
-    setFormData({ ...formData, photo: file }); // store file object
+    setFormData({ ...formData, recruiterImage: file }); // store file object
     setPreview(URL.createObjectURL(file)); // preview
   }
 };
@@ -84,18 +84,19 @@ const handleSave = () => {
             <CardContent sx={{ p: 4 }}>
               <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
                 <Box sx={{ position: "relative", mr: 3 }}>
-<Avatar
-  src={editMode ? preview : user?.photo}
-  sx={{
-    width: 80,
-    height: 80,
-    background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-    fontSize: "2rem",
-    fontWeight: "bold",
-  }}
->
-  {!user?.photo && formData?.fullName?.charAt(0)?.toUpperCase()}
-</Avatar>
+                    <Avatar
+                      src={editMode ? preview : user?.photo}
+                      sx={{
+                        width: 80,
+                        height: 80,
+                        background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                        fontSize: "2rem",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {!user?.photo && formData?.fullName?.charAt(0)?.toUpperCase()}
+                    </Avatar>
+                    
                   {editMode && (
                     <label htmlFor="upload-photo">
                       <input

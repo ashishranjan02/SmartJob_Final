@@ -1,45 +1,16 @@
-import React, { useState, useMemo } from "react";
-import { Box, Typography, Pagination, Container, Grid } from "@mui/material";
+import React, { useState, useMemo, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Box, Typography, Pagination, Container, Grid, CircularProgress } from "@mui/material";
 import Filters from "../../components/Filter";
 import JobCard from "../../components/JobCard";
 import AdsPanel from "../../components/AdsPanel";
 import Header from "../../components/Header";
-
-// Dummy jobs data
-const jobsData = [
-  {
-    title: "Maintenance Engineer",
-    company: "TECHLOOK",
-    description: "Only job description for demo",
-    date: "10 Feb, 2025",
-    location: "Noida",
-    jobFunction: "Maintenance Engineer",
-    experience: "3-5 Years",
-    salary: "6-10 Lacs",
-  },
-  {
-    title: "Software Engineer",
-    company: "INNOVATIVE SOLUTIONS PVT LTD",
-    description: "Develop, test and maintain highly-scalable web apps...",
-    date: "15 Mar, 2024",
-    location: "Bangalore, India",
-    jobFunction: "Software Engineer",
-    experience: "0-2 Years",
-    salary: "2-4 Lacs",
-  },
-  {
-    title: "Database Administrator",
-    company: "DB Corp",
-    description: "Manage database systems...",
-    date: "20 Mar, 2024",
-    location: "Delhi/NCR",
-    jobFunction: "Database Administrator",
-    experience: "5-7 Years",
-    salary: "6-10 Lacs",
-  },
-];
+import { fetchJobs } from "../../features/jobs/JobSlice";
 
 const Jobs = () => {
+  const dispatch = useDispatch();
+  const { jobs, loading, error } = useSelector((state) => state.jobs);
+
   const [filters, setFilters] = useState({
     jobFunction: [],
     location: [],
@@ -47,9 +18,16 @@ const Jobs = () => {
     salary: [],
   });
 
+  const [page, setPage] = useState(1);          
+  const jobsPerPage = 5;                        
+
+  useEffect(() => {
+    dispatch(fetchJobs());
+  }, [dispatch]);
+
   // Filter logic
   const filteredJobs = useMemo(() => {
-    return jobsData.filter((job) => {
+    return jobs.filter((job) => {
       const matchJobFunction =
         filters.jobFunction.length === 0 ||
         filters.jobFunction.includes(job.jobFunction);
@@ -68,27 +46,31 @@ const Jobs = () => {
 
       return matchJobFunction && matchLocation && matchExperience && matchSalary;
     });
-  }, [filters]);
+  }, [filters, jobs]);
+
+  // Pagination logic
+  const pageCount = Math.ceil(filteredJobs.length / jobsPerPage);
+  const paginatedJobs = filteredJobs.slice(
+    (page - 1) * jobsPerPage,
+    page * jobsPerPage
+  );
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+    window.scrollTo({ top: 0, behavior: "smooth" }); // optional: scroll to top
+  };
 
   return (
-    
     <Container maxWidth="lg" sx={{ py: 2 }}>
-        <Header/>
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          bgcolor: "#f5f5f5",
-          minHeight: "100vh",
-        }}
-      >
+      <Header />
+      <Grid container spacing={2} sx={{ bgcolor: "#f5f5f5", minHeight: "100vh" }}>
         {/* Filters */}
-        <Grid size={{xs:12,md:3}}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <Filters filters={filters} setFilters={setFilters} />
         </Grid>
 
-        {/* Jobs + Ads in one flex row */}
-        <Grid size={{xs:12,md:9}}>
+        {/* Jobs + Ads */}
+        <Grid size={{ xs: 12, md: 9 }}>
           <Box
             sx={{
               display: "flex",
@@ -98,21 +80,36 @@ const Jobs = () => {
           >
             {/* Jobs */}
             <Box sx={{ flex: 1, p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                {filteredJobs.length} Jobs Found
-              </Typography>
-              {filteredJobs.map((job, idx) => (
-                <JobCard key={idx} job={job} />
-              ))}
-              {filteredJobs.length === 0 && (
-                <Typography color="error">
-                  No jobs found for selected filters.
-                </Typography>
+              {loading && <CircularProgress />}
+              {error && <Typography color="error">{error}</Typography>}
+
+              {!loading && !error && (
+                <>
+                  <Typography variant="h6" gutterBottom>
+                    {filteredJobs.length} Jobs Found
+                  </Typography>
+                  {paginatedJobs.map((job, idx) => (
+                    <JobCard key={idx} job={job} />
+                  ))}
+                  {filteredJobs.length === 0 && (
+                    <Typography color="error">
+                      No jobs found for selected filters.
+                    </Typography>
+                  )}
+                  {pageCount > 1 && (
+                    <Pagination
+                      count={pageCount}
+                      page={page}
+                      onChange={handlePageChange}
+                      color="primary"
+                      sx={{ mt: 2 }}
+                    />
+                  )}
+                </>
               )}
-              <Pagination count={3} color="primary" sx={{ mt: 2 }} />
             </Box>
 
-            {/* Ads always on the side */}
+            {/* Ads */}
             <Box
               sx={{
                 width: { xs: "100%", sm: 260 },

@@ -2,8 +2,9 @@ import express from 'express';
 import {
   getAllEmploy,
   login,
-  updateRecruiter,
+  updateRecruiterProfile,
   getRecruiterById,
+  getEmployProfile,
   getAllRecruiterCount,
   getActiveRecruiterCount,
   updateRecruiterStatus,
@@ -12,7 +13,7 @@ import {
   createEmploy,
 } from '../Controller/Employ.Controller.js';
 import { upload } from '../Middleware/multer.middleware.js';
-import { verifyToken } from '../Middleware/auth.Middleware.js';
+import { verifyToken } from '../Middleware/Employ.Middleware.js';
 
 const employrouter = express.Router();
 
@@ -20,10 +21,16 @@ const employrouter = express.Router();
 employrouter.post('/create', upload.single("recruiterImage"), createEmploy);
 employrouter.post('/login', login);
 
+
+employrouter.get("/protected", verifyToken, (req, res) => {
+  res.status(200).json({ message: "This is a protected route" });
+});
+
 // Protected routes
-employrouter.get('/allemploy', verifyToken, getAllEmploy);
-employrouter.put('/update/:recruiterId', verifyToken, upload.single("recruiterImage"), updateRecruiter);
-employrouter.get('/view/:recruiterId', verifyToken, getRecruiterById);
+employrouter.get('/allemploy', getAllEmploy);
+employrouter.put('/update/:recruiterId', upload.single("recruiterImage"), updateRecruiterProfile);
+employrouter.get('/view/:recruiterId', getRecruiterById);
+employrouter.get('/fetchprofile/:recruiterId', getEmployProfile);
 employrouter.put('/updatestatus/:recruiterId', verifyToken, upload.none(), updateRecruiterStatus);
 employrouter.get('/allcount', verifyToken, getAllRecruiterCount);
 employrouter.get('/activecount', verifyToken, getActiveRecruiterCount);

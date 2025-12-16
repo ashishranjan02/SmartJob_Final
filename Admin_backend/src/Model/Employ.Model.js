@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const employSchema = mongoose.Schema({
     
     firstName:{type:String, required:true},
-    lastName:{type:String, },
+    lastName:{type:String },
     gender:{type:String, required:true},
     email:{
         type:String, 
@@ -17,7 +17,7 @@ const employSchema = mongoose.Schema({
         match:[/^[6-9][0-9]{9}$/, "Invalid phone number"]
     },
     currentLocation:{type:String, required:true},
-    description:{type:String, requirdd:true},
+    description:{type:String, required:true},
     totalExperience:{type:String, required:true},
     level:{
         type:String,
@@ -51,24 +51,38 @@ const employSchema = mongoose.Schema({
 
 })
 
+
 employSchema.pre("save", async function (next) {
+  try {
     if (this.role === "Recruiter" && !this.recruiterId)  {
-        const prefix = "REC"; 
-        const randomDigit = Math.floor(1000 + Math.random() * 9000);    
-        this.recruiterId = `${prefix}${randomDigit}`;  
+        let unique = false;
+        while(!unique){
+            const id = `REC${Math.floor(1000 + Math.random() * 9000)}`;
+            const exist = await mongoose.model('employ').findOne({recruiterId: id})
+            if(!exist){
+                this.recruiterId = id;
+                unique = true;
+            }
+        }
     }
-    next();
-});
 
-employSchema.pre("save", async function (next) {
     if (this.role === "Admin" && !this.adminId) {
-        const prefix = "ADM"; 
-        const randomDigit = Math.floor(1000 + Math.random() * 9000);    
-        this.adminId = `${prefix}${randomDigit}`;  
+        let unique = false;
+        while(!unique){
+            const id = `ADM${Math.floor(1000 + Math.random() * 9000)}`;
+            const exist = await mongoose.model('employ').findOne({adminId: id})
+            if(!exist){
+                this.adminId = id;
+                unique = true;
+            }
+        }
     }
     next();
+  } 
+  catch (error) {
+    console.error(error);
+  }
 });
-
 
 const employ = mongoose.model('employ', employSchema);
 export default employ;

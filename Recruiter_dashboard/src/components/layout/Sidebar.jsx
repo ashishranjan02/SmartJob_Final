@@ -27,9 +27,9 @@ import {
   ExpandMore,
   List as ListIcon,
 } from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext.jsx';
+// import { useAuth } from '../../contexts/AuthContext.jsx';
 import { ROUTES } from '../../routes';
-import {loginUser} from '../../slice/RegisterSlice.js';
+// import {loginUser} from '../../slice/RegisterSlice.js';
 import { useSelector,useDispatch } from 'react-redux';
 
 const Sidebar = ({ drawerWidth, mobileOpen, handleDrawerToggle, isMobile }) => {
@@ -38,7 +38,7 @@ const Sidebar = ({ drawerWidth, mobileOpen, handleDrawerToggle, isMobile }) => {
 //  const { user } = useAuth();
   const [jobsOpen, setJobsOpen] = React.useState(false);
   const [candidatesOpen, setCandidatesOpen] = React.useState(false);
-  const {user}=useSelector((state)=>state.users);
+  const {user}=useSelector((state)=>state.recruiterProfile);
   const dispatch = useDispatch();
  
   const menuItems = [

@@ -14,7 +14,7 @@ import {
   Paper,
 } from "@mui/material";
 import { Work, Add, CloudUpload } from "@mui/icons-material";
-import { registerUser, verifyOtp } from "../../../features/candidate/loginslice.js";
+import { registerUser, verifyOtp } from "../../../features/candidate/loginSlice.js";
 
 const CandidateRegisterPage = () => {
   const dispatch = useDispatch();

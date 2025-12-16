@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { Work } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser, clearError } from "../../../features/candidate/loginslice.js";
+import { loginUser, clearError } from "../../../features/candidate/loginSlice.js";
 
 const CandidateLoginPage = () => {
   const dispatch = useDispatch();
@@ -27,7 +27,7 @@ const CandidateLoginPage = () => {
   useEffect(() => {
     // Redirect if token exists (already logged in)
     if (token) {
-      navigate("/profile");
+      navigate("/");
     }
   }, [token, navigate]);
 
@@ -40,7 +40,7 @@ const CandidateLoginPage = () => {
     if (loginUser.fulfilled.match(resultAction)) {
       setSuccess(true);
       setTimeout(() => {
-        navigate("/profile");
+        navigate("/");
       }, 1500);
     } else {
       setSuccess(false);

@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from '../utils/axios';
+import {job_URL} from '../utils/axios';
 
 
 export const createJob = createAsyncThunk("jobs/createJob",async (jobData, thunkApi) => {
     try {
-      const res = await axios.post(`jobs/`, jobData);
+      const res = await axios.post(`${job_URL}/`, jobData);
       return res.data.data; 
     } catch (err) {
       return thunkApi.rejectWithValue(
@@ -13,9 +13,11 @@ export const createJob = createAsyncThunk("jobs/createJob",async (jobData, thunk
     }
   }
 );
+
+
 export const fetchJobs = createAsyncThunk("jobs/fetchJobs", async (_, thunkApi) => {
   try {
-    const res = await axios.get(`jobs/`);
+    const res = await axios.get(`${job_URL}/`);
     return res.data.data;  
   } catch (err) {
     return thunkApi.rejectWithValue(
@@ -23,9 +25,10 @@ export const fetchJobs = createAsyncThunk("jobs/fetchJobs", async (_, thunkApi) 
     );
   }
 });
+
 export const fetchJobStats = createAsyncThunk("jobs/fetchJobStats", async (_, thunkApi) => {
   try {
-    const res = await axios.get(`jobs/stats`);
+    const res = await axios.get(`${job_URL}/stats`);
     return res.data.data;
   } catch (err) {
     return thunkApi.rejectWithValue(
@@ -36,7 +39,7 @@ export const fetchJobStats = createAsyncThunk("jobs/fetchJobStats", async (_, th
 
 export const updateJob = createAsyncThunk("jobs/updateJob",async (jobData, thunkApi) => {
     try {
-      const res = await axios.put(`jobs/${jobData._id}`, jobData);
+      const res = await axios.put(`${job_URL}/${jobData._id}`, jobData);
       return res.data.data;
     } catch (err) {
       return thunkApi.rejectWithValue(
@@ -45,9 +48,10 @@ export const updateJob = createAsyncThunk("jobs/updateJob",async (jobData, thunk
     }
   }
 )
+
 export const deleteJob = createAsyncThunk("jobs/deleteJob",async (jobId, thunkApi) => {
     try {
-      await axios.delete(`jobs/${jobId}`);
+      await axios.delete(`/${jobId}`);
       return jobId;
     } catch (err) {
       return thunkApi.rejectWithValue(
@@ -56,6 +60,7 @@ export const deleteJob = createAsyncThunk("jobs/deleteJob",async (jobId, thunkAp
     }
   }
 );
+
 const initialState = {
   jobs: [],
   jobs2:[],

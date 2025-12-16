@@ -8,13 +8,13 @@ function App() {
   const [ready, setReady] = useState(false); // wait until URL params processed
 
   useEffect(() => {
-    console.log(" App mounted on 5173");
+    console.log(" App mounted on 5174");
 
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     const role = params.get("role");
 
-    console.log(" URL params on 5173:", { token, role });
+    console.log(" URL params on 5174:", { token, role });
 
     if (token && role) {
       localStorage.setItem("authToken", token);

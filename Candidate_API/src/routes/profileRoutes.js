@@ -41,4 +41,5 @@ router.get(
 // Verify updated email
 router.post("/verify-email-update", protect, verifyUpdatedEmail);
 
+
 export default router;
